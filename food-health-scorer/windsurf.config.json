@@ -1,0 +1,20 @@
+{
+  "name": "food-health-scorer",
+  "version": "1.0.0",
+  "description": "Food Health Scoring Application",
+  "frontend": {
+    "directory": "./frontend",
+    "framework": "nextjs",
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "env": {
+      "VUE_APP_API_URL": "${API_URL}/api"
+    }
+  },
+  "backend": {
+    "directory": "./backend",
+    "runtime": "python",
+    "entrypoint": "main.py",
+    "requirements": "requirements.txt"
+  }
+}

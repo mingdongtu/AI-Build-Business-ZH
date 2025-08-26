@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "esnext",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "jsx": "preserve"
+  },
+  "vueCompilerOptions": {
+    "target": 3,
+    "globalTypesPath": "./node_modules/vue/types/global.d.ts"
+  },
+  "exclude": ["node_modules"]
+}
