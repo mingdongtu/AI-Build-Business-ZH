@@ -1,8 +1,9 @@
-import requests
 import json
 import os
+import re
 from typing import Dict, Any, List
 import logging
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -81,43 +82,32 @@ class DeepSeekAnalyzer:
         return prompt
     
     def _call_deepseek_api(self, prompt: str) -> str:
-        """调用DeepSeek API"""
-        url = f"{self.api_base}/v1/chat/completions"
-        
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        data = {
-            "model": "deepseek-chat",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.3,
-            "max_tokens": 2000,
-            "stream": False
-        }
-        
+        """调用DeepSeek API，使用OpenAI客户端库"""
         try:
-            response = requests.post(url, headers=headers, json=data, timeout=30)
-            response.raise_for_status()
+            # 创建OpenAI客户端，配置为使用DeepSeek API
+            client = OpenAI(
+                api_key=self.api_key,
+                base_url=self.api_base
+            )
             
-            result = response.json()
+            # 发送请求
+            response = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=2000
+            )
             
-            if "choices" in result and len(result["choices"]) > 0:
-                content = result["choices"][0]["message"]["content"]
+            # 提取内容
+            if response.choices and len(response.choices) > 0:
+                content = response.choices[0].message.content
                 logger.info("DeepSeek API调用成功")
                 return content
             else:
                 raise Exception("DeepSeek API返回格式异常")
                 
-        except requests.exceptions.RequestException as e:
-            logger.error(f"DeepSeek API请求失败: {e}")
-            raise
         except Exception as e:
             logger.error(f"DeepSeek API调用失败: {e}")
             raise

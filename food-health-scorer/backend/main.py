@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import Callable
+from dotenv import load_dotenv
 from api.routes import router as api_router
 from utils.image_processor import ImageProcessor
 
@@ -168,6 +169,34 @@ image_processor = None
 @app.on_event("startup")
 async def startup_event():
     global image_processor
+    
+    # 加载环境变量
+    try:
+        # 尝试加载.env文件
+        load_dotenv()
+        logger.info("环境变量加载成功")
+        
+        # 尝试加载config_local.py
+        try:
+            import config_local
+            logger.info("本地配置文件加载成功")
+        except ImportError:
+            logger.warning("未找到本地配置文件config_local.py，将使用环境变量")
+            
+        # 检查关键API密钥是否已配置
+        if os.getenv('BAIDU_OCR_API_KEY'):
+            logger.info("百度OCR API密钥已配置")
+        else:
+            logger.warning("百度OCR API密钥未配置，OCR功能可能无法正常工作")
+            
+        if os.getenv('DEEPSEEK_API_KEY'):
+            logger.info("DeepSeek API密钥已配置")
+        else:
+            logger.warning("DeepSeek API密钥未配置，分析功能可能无法正常工作")
+    except Exception as e:
+        logger.error(f"加载配置文件失败: {str(e)}")
+    
+    # 初始化ImageProcessor
     logger.info("Initializing ImageProcessor on startup...")
     try:
         image_processor = ImageProcessor()

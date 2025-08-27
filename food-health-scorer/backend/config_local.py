@@ -10,9 +10,9 @@ import os
 os.environ['BAIDU_OCR_API_KEY'] = 'qxIAKpmsAIFADM695cssGsac'
 os.environ['BAIDU_OCR_SECRET_KEY'] = 'K8IkjGzpIvJJobaUBaqhaHTlFfqmODCl'
 
-# DeepSeek API密钥（需要您提供）
-# os.environ['DEEPSEEK_API_KEY'] = 'your_deepseek_api_key_here'
-# os.environ['DEEPSEEK_API_BASE'] = 'https://api.deepseek.com'
+# DeepSeek API密钥
+os.environ['DEEPSEEK_API_KEY'] = 'sk-a13783fe0c9c477196100416b0107f2c'
+os.environ['DEEPSEEK_API_BASE'] = 'https://api.deepseek.com'
 
 # 应用配置
 os.environ['DEBUG'] = 'True'
