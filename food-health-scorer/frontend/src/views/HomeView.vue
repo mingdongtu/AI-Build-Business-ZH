@@ -3,15 +3,26 @@
     <h2>食品健康评分</h2>
     <p class="subtitle">拍摄食品包装袋配料表，获取健康评分和分析</p>
     
-    <image-analyzer />
+    <!-- 引导页面 -->
+    <div v-if="showWelcome" class="welcome-screen">
+      <div class="welcome-content">
+        <div class="welcome-icon">📸</div>
+        <h3>欢迎使用食品健康评分</h3>
+        <p>拍摄食品包装上的配料表，立即获取健康评分</p>
+        <button class="start-button" @click="startCapture">开始使用</button>
+      </div>
+    </div>
     
-    <div class="features-section">
+    <!-- 相机/分析界面 -->
+    <image-analyzer v-if="!showWelcome" />
+    
+    <div class="features-section" v-if="showWelcome">
       <h3>功能介绍</h3>
       <div class="features-grid">
         <div class="feature-item">
           <div class="feature-icon">📷</div>
           <div class="feature-title">拍照识别</div>
-          <div class="feature-desc">直接拍摄食品包装上的配料表</div>
+          <div class="feature-desc">直接拍摄食品包装上的配料表部分</div>
         </div>
         <div class="feature-item">
           <div class="feature-icon">🔍</div>
@@ -40,6 +51,16 @@ export default {
   name: 'HomeView',
   components: {
     ImageAnalyzer
+  },
+  data() {
+    return {
+      showWelcome: true
+    }
+  },
+  methods: {
+    startCapture() {
+      this.showWelcome = false;
+    }
   }
 }
 </script>
@@ -55,6 +76,58 @@ export default {
   color: #666;
   margin-bottom: 30px;
   font-size: 16px;
+}
+
+/* 欢迎屏幕样式 */
+.welcome-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.welcome-content {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.welcome-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.welcome-content h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.welcome-content p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.start-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.start-button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .features-section {
@@ -114,6 +187,16 @@ export default {
   
   .feature-item {
     padding: 15px;
+  }
+  
+  .welcome-content {
+    padding: 20px;
+    margin: 0 10px;
+  }
+  
+  .start-button {
+    padding: 10px 24px;
+    font-size: 14px;
   }
 }
 </style>

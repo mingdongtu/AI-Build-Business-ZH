@@ -1,6 +1,6 @@
 <template>
   <div class="image-analyzer">
-    <div v-if="!isAnalyzing && !analysisComplete" class="upload-section">
+    <div v-if="!isAnalyzing && !analysisComplete && !analysisError" class="upload-section">
       <h3>食品配料分析</h3>
       <p class="instruction">请上传食品包装袋配料表图片进行健康评分分析</p>
       
@@ -14,8 +14,13 @@
       <div class="loading-container">
         <div class="loading-spinner"></div>
         <div class="loading-text">
-          <p>正在分析配料表...</p>
+          <p>OCR识别中</p>
           <p class="loading-step">{{ loadingStep }}</p>
+          <div class="loading-animation">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -23,17 +28,35 @@
     <div v-if="analysisError" class="error-section">
       <div class="error-container">
         <div class="error-icon">❌</div>
-        <h3>分析失败</h3>
+        <h3>识别失败</h3>
         <p>{{ analysisError }}</p>
-        <button class="retry-button" @click="resetAnalysis">重新上传</button>
+        <div class="error-actions">
+          <button class="retry-button" @click="resetAnalysis">重新拍摄</button>
+          <button class="manual-input-button" @click="showManualInput = true">手动输入</button>
+        </div>
+      </div>
+      
+      <!-- 手动输入表单 -->
+      <div v-if="showManualInput" class="manual-input-section">
+        <h4>手动输入配料表</h4>
+        <textarea 
+          v-model="manualIngredients" 
+          placeholder="请输入食品包装上的配料表内容..."
+          rows="6"
+          class="manual-input"
+        ></textarea>
+        <div class="manual-actions">
+          <button class="cancel-button" @click="showManualInput = false">取消</button>
+          <button class="submit-button" @click="analyzeManualInput">确认提交</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
 import CameraCapture from './CameraCapture.vue';
+import { mockAnalysisResult, mockOcrFailureResult, mockManualInputResult } from '@/mockData.js';
 
 export default {
   name: 'ImageAnalyzer',
@@ -42,136 +65,176 @@ export default {
   },
   data() {
     return {
+      apiBaseUrl: process.env.VUE_APP_API_URL || 'http://localhost:8000',
+      capturedImage: null,
+      loading: false,
+      error: null,
+      loadingText: '正在分析图片...',
+      loadingSteps: [
+        '正在识别食品包装...',
+        '提取配料表信息...',
+        '分析营养成分...',
+        '计算健康评分...',
+        '生成健康建议...'
+      ],
+      loadingStep: 0,
+      loadingInterval: null,
+      showManualInput: false,
+      manualIngredients: '',
+      manualFoodName: '',
+      manualInputError: '',
+      ocrFailed: false,
       isAnalyzing: false,
       analysisComplete: false,
       analysisError: null,
-      capturedImage: null,
-      loadingStep: '识别图片中...',
-      loadingSteps: [
-        '识别图片中...',
-        '提取配料信息...',
-        '分析配料成分...',
-        '计算健康评分...',
-        '生成分析报告...'
-      ],
-      currentStepIndex: 0,
-      stepInterval: null
-    }
+      analysisResult: null,
+      imageData: null
+    };
   },
   methods: {
-    // 处理图片捕获
     handleImageCaptured(imageData) {
-      this.capturedImage = imageData;
-      this.analyzeImage(imageData.file);
+      this.imageData = imageData;
+      this.analyzeImage();
     },
-    
-    // 处理捕获错误
     handleCaptureError(error) {
-      this.analysisError = error;
+      this.analysisError = `相机错误: ${error}`;
     },
-    
-    // 分析图片
-    async analyzeImage(imageFile) {
-      if (!imageFile) return;
-      
+    async analyzeImage() {
+      if (!this.imageData) {
+        this.analysisError = '没有图片数据可供分析';
+        return;
+      }
+
       this.isAnalyzing = true;
       this.analysisError = null;
-      this.startLoadingAnimation();
+      this.analysisComplete = false;
       
-      try {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        
-        // 获取API URL，优先使用环境变量中的配置
-        const apiUrl = process.env.VUE_APP_API_URL || '/api';
-        
-        console.log('Using API URL:', apiUrl);
-        
-        const response = await axios.post(`${apiUrl}/analyze`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          timeout: 30000, // 30 second timeout
-        });
+      // 开始加载步骤切换
+      this.startLoadingSteps();
 
-        console.log('Analysis response:', response.data);
+      try {
+        // 使用模拟数据进行测试
+        // 随机模拟OCR成功或失败
+        const useSuccessData = Math.random() > 0.3; // 70%概率成功
         
-        // 打印OCR识别的文字到浏览器控制台
-        if (response.data.extracted_text) {
-          console.log('=== 百度OCR识别的文字内容 ===');
-          console.log(response.data.extracted_text);
-          console.log('=== OCR识别完成 ===');
+        // 模拟API延迟
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // 使用模拟数据
+        this.analysisResult = useSuccessData ? mockAnalysisResult : mockOcrFailureResult;
+        this.analysisComplete = true;
+        
+        // 检查OCR是否成功
+        if (!useSuccessData || this.analysisResult.ocr_success === false) {
+          // OCR失败，显示手动输入表单
+          this.analysisError = 'OCR识别失败，无法识别配料表文字';
+          this.showManualInput = true;
+          this.isAnalyzing = false;
+          this.stopLoadingSteps();
+          return;
         }
         
-        // Store the results in localStorage for the results page
-        localStorage.setItem('analysisResults', JSON.stringify(response.data));
+        // 将结果存储到 localStorage
+        localStorage.setItem('analysisResult', JSON.stringify(this.analysisResult));
         
-        // 分析完成，跳转到结果页面
-        this.analysisComplete = true;
+        // 在跳转前确保停止加载动画
+        this.isAnalyzing = false;
+        this.stopLoadingSteps();
+        
+        // 跳转到结果页面
         this.$router.push('/results');
       } catch (error) {
-        console.error('图片分析失败:', error);
-        
-        // 处理不同类型的错误
-        if (error.response) {
-          // 服务器返回了错误状态码
-          if (error.response.status === 413) {
-            this.analysisError = '图片文件太大，请使用较小的图片';
-          } else if (error.response.status === 415) {
-            this.analysisError = '不支持的文件类型，请上传图片文件';
-          } else if (error.response.status === 422) {
-            this.analysisError = '无法识别图片中的配料表，请确保图片清晰且包含配料表';
-          } else {
-            this.analysisError = `服务器错误 (${error.response.status})，请稍后重试`;
-          }
-        } else if (error.request) {
-          // 请求已发送但没有收到响应
-          this.analysisError = '服务器无响应，请检查网络连接后重试';
-        } else if (error.code === 'ECONNABORTED') {
-          // 请求超时
-          this.analysisError = '请求超时，服务器处理时间过长，请稍后重试';
-        } else {
-          // 其他错误
-          this.analysisError = '图片上传或分析失败，请重试';
-        }
+        console.error('Analysis error:', error);
+        this.showError('OCR识别过程中发生错误');
       } finally {
         this.isAnalyzing = false;
-        this.stopLoadingAnimation();
+        this.stopLoadingSteps();
+      }
+    },
+    async analyzeManualInput() {
+      if (!this.manualIngredients || !this.manualIngredients.trim()) {
+        this.manualInputError = '请输入配料文本';
+        return;
+      }
+      
+      this.manualInputError = '';
+      this.isAnalyzing = true;
+      this.loadingStep = '正在分析您输入的文本...';
+      this.startLoadingSteps();
+
+      try {
+        // 使用模拟数据进行测试
+        // 模拟API延迟
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 使用手动输入的模拟数据
+        const result = {...mockManualInputResult};
+        
+        // 如果用户输入了食品名称，则使用用户输入的名称
+        if (this.manualFoodName) {
+          result.food_name = this.manualFoodName;
+        }
+        
+        // 存储分析结果
+        localStorage.setItem('analysisResult', JSON.stringify(result));
+        
+        // 在跳转前确保停止加载动画
+        this.isAnalyzing = false;
+        this.stopLoadingSteps();
+        
+        // 跳转到结果页面
+        this.$router.push('/results');
+      } catch (error) {
+        console.error('手动输入分析错误:', error);
+        this.analysisError = error.message || '分析过程中发生错误';
+      } finally {
+        this.isAnalyzing = false;
+        this.stopLoadingSteps();
       }
     },
     
-    // 开始加载动画
-    startLoadingAnimation() {
-      this.currentStepIndex = 0;
+    startLoadingSteps() {
+      this.loadingStepIndex = 0;
       this.loadingStep = this.loadingSteps[0];
       
-      // 每2秒更新一次加载步骤
-      this.stepInterval = setInterval(() => {
-        this.currentStepIndex = (this.currentStepIndex + 1) % this.loadingSteps.length;
-        this.loadingStep = this.loadingSteps[this.currentStepIndex];
+      this.loadingInterval = setInterval(() => {
+        this.loadingStepIndex = (this.loadingStepIndex + 1) % this.loadingSteps.length;
+        this.loadingStep = this.loadingSteps[this.loadingStepIndex];
       }, 2000);
     },
     
-    // 停止加载动画
-    stopLoadingAnimation() {
-      if (this.stepInterval) {
-        clearInterval(this.stepInterval);
-        this.stepInterval = null;
+    stopLoadingSteps() {
+      if (this.loadingInterval) {
+        clearInterval(this.loadingInterval);
+        this.loadingInterval = null;
       }
+      // Reset loading-related states to ensure no animations continue
+      this.loadingStep = '';
+      this.loadingStepIndex = 0;
+      this.isAnalyzing = false;
     },
     
-    // 重置分析
     resetAnalysis() {
       this.isAnalyzing = false;
       this.analysisComplete = false;
       this.analysisError = null;
-      this.capturedImage = null;
-      this.stopLoadingAnimation();
+      this.analysisResult = null;
+      this.imageData = null;
+      this.loadingStepIndex = 0;
+      this.loadingStep = this.loadingSteps[0];
+      this.showManualInput = false;
+      this.manualIngredients = '';
+    },
+    
+    showError(message) {
+      this.analysisError = message;
+      this.isAnalyzing = false;
+      this.stopLoadingSteps();
     }
   },
   beforeUnmount() {
     // 组件销毁前清除定时器
-    this.stopLoadingAnimation();
+    this.stopLoadingSteps();
   }
 }
 </script>
@@ -280,6 +343,120 @@ export default {
   background-color: #0b7dda;
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 手动输入按钮 */
+.error-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.manual-input-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.manual-input-button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 手动输入表单 */
+.manual-input-section {
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.manual-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.manual-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.cancel-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  background-color: #0b7dda;
+  transform: translateY(-2px);
+}
+
+.cancel-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* 加载动画点 */
+.loading-animation {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #2196F3;
+  border-radius: 50%;
+  margin: 0 5px;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 40% { 
+    transform: scale(1.0);
+  }
 }
 
 /* 移动端适配 */

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Request, Body
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import os
 import time
 import tempfile
@@ -29,6 +30,10 @@ ALLOWED_IMAGE_TYPES = {
     "image/jpeg", "image/jpg", "image/png", "image/gif", 
     "image/bmp", "image/webp", "image/tiff"
 }
+
+class ManualTextInput(BaseModel):
+    text: str
+    food_name: str = ""
 
 @router.post("/analyze")
 async def analyze_food_image(request: Request, image: UploadFile = File(...)):
@@ -77,15 +82,22 @@ async def analyze_food_image(request: Request, image: UploadFile = File(...)):
         
         # 使用百度OCR提取文字
         logger.info("开始使用百度OCR提取文字")
+        ocr_success = True
         try:
             baidu_ocr = BaiduOCR()
             extracted_text = baidu_ocr.extract_ingredients_text(temp_file_path, use_accurate=True)
             logger.info(f"百度OCR提取完成，文本长度: {len(extracted_text)}")
             logger.info(f"OCR识别的完整文字内容:\n{extracted_text}")
+            
+            # 检查OCR结果是否有效
+            if not extracted_text or len(extracted_text.strip()) < 10:
+                logger.warning("OCR提取的文本内容过少，可能识别失败")
+                ocr_success = False
+                extracted_text = "OCR识别失败，请使用手动输入"
         except Exception as e:
             logger.error(f"百度OCR提取失败: {e}")
-            # 如果OCR失败，使用默认文本
-            extracted_text = "无法识别文字内容"
+            ocr_success = False
+            extracted_text = "OCR识别失败，请使用手动输入"
         
         # 使用DeepSeek-V3.1分析食品
         logger.info("开始使用DeepSeek-V3.1分析食品")
@@ -117,7 +129,8 @@ async def analyze_food_image(request: Request, image: UploadFile = File(...)):
             "file_size": file_size,
             "file_type": image.content_type,
             "ocr_provider": "百度OCR",
-            "analysis_provider": "DeepSeek-V3.1"
+            "analysis_provider": "DeepSeek-V3.1",
+            "ocr_success": ocr_success  # 添加OCR成功标志
         })
         
         # 清理临时文件
@@ -165,12 +178,82 @@ async def health_check():
         logger.error(f"健康检查失败: {e}")
         raise HTTPException(status_code=500, detail="服务不可用")
 
+@router.post("/analyze-text")
+async def analyze_food_text(request: Request, input_data: ManualTextInput):
+    """
+    分析手动输入的食品配料文本
+    
+    Args:
+        input_data: 包含食品名称和配料文本的输入数据
+        
+    Returns:
+        dict: 包含健康评分、配料分析和建议的分析结果
+    """
+    start_time = time.time()
+    
+    try:
+        text = input_data.text
+        food_name = input_data.food_name
+        
+        if not text or len(text.strip()) < 3:
+            raise HTTPException(status_code=400, detail="输入的文本内容过少")
+        
+        logger.info(f"收到手动输入的文本，长度: {len(text)}字符")
+        logger.info(f"食品名称: {food_name if food_name else '未提供'}")
+        
+        # 使用DeepSeek-V3.1分析食品
+        logger.info("开始使用DeepSeek-V3.1分析食品")
+        try:
+            deepseek_analyzer = DeepSeekAnalyzer()
+            analysis_result = deepseek_analyzer.analyze_food_ingredients(text)
+            
+            # 如果提供了食品名称，则覆盖分析结果中的名称
+            if food_name:
+                analysis_result["food_name"] = food_name
+                
+            logger.info(f"DeepSeek分析完成，健康评分: {analysis_result.get('score', 'N/A')}")
+        except Exception as e:
+            logger.error(f"DeepSeek分析失败: {e}")
+            # 如果分析失败，返回默认结果
+            analysis_result = {
+                "food_name": food_name if food_name else "未识别食品",
+                "ingredients": [],
+                "score": 50,
+                "health_points": ["分析服务暂时不可用"],
+                "recommendations": ["建议查看食品标签，选择天然成分较多的产品"],
+                "detailed_analysis": {
+                    "positive_aspects": [],
+                    "negative_aspects": [],
+                    "nutritional_highlights": []
+                }
+            }
+        
+        # 添加元数据到响应
+        analysis_result.update({
+            "processing_time": round(time.time() - start_time, 2),
+            "extracted_text": text,  # 添加用户输入的文字
+            "extracted_text_length": len(text),
+            "manual_input": True,
+            "analysis_provider": "DeepSeek-V3.1"
+        })
+        
+        logger.info(f"手动输入分析完成，总处理时间: {analysis_result['processing_time']}秒")
+        
+        return analysis_result
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"分析过程中发生未预期错误: {e}")
+        raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")
+
 @router.get("/")
 async def root():
     """根路径接口"""
     return {
         "message": "食品健康评分API",
-        "version": "2.0.0",
-        "features": ["百度OCR文字识别", "DeepSeek-V3.1智能分析"],
-        "endpoints": ["/analyze", "/health"]
+        "version": "2.1.0",
+        "features": ["百度OCR文字识别", "DeepSeek-V3.1智能分析", "手动文本输入分析"],
+        "endpoints": ["/analyze", "/analyze-text", "/health"]
     }
