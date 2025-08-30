@@ -1,0 +1,377 @@
+@import './variables.scss';
+
+/* 全局样式重置 */
+page, view, text, image, button, input, textarea, scroll-view, swiper, swiper-item {
+  box-sizing: border-box;
+}
+
+/* 清除按钮默认样式 */
+button {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  border: none;
+  &::after {
+    border: none;
+  }
+}
+
+/* 通用布局类 */
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+/* 通用边距类 */
+.m-0 { margin: 0; }
+.m-1 { margin: $spacing-small; }
+.m-2 { margin: $spacing-base; }
+.m-3 { margin: $spacing-medium; }
+.m-4 { margin: $spacing-large; }
+.m-5 { margin: $spacing-xlarge; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: $spacing-small; }
+.mt-2 { margin-top: $spacing-base; }
+.mt-3 { margin-top: $spacing-medium; }
+.mt-4 { margin-top: $spacing-large; }
+.mt-5 { margin-top: $spacing-xlarge; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: $spacing-small; }
+.mb-2 { margin-bottom: $spacing-base; }
+.mb-3 { margin-bottom: $spacing-medium; }
+.mb-4 { margin-bottom: $spacing-large; }
+.mb-5 { margin-bottom: $spacing-xlarge; }
+
+.ml-0 { margin-left: 0; }
+.ml-1 { margin-left: $spacing-small; }
+.ml-2 { margin-left: $spacing-base; }
+.ml-3 { margin-left: $spacing-medium; }
+.ml-4 { margin-left: $spacing-large; }
+.ml-5 { margin-left: $spacing-xlarge; }
+
+.mr-0 { margin-right: 0; }
+.mr-1 { margin-right: $spacing-small; }
+.mr-2 { margin-right: $spacing-base; }
+.mr-3 { margin-right: $spacing-medium; }
+.mr-4 { margin-right: $spacing-large; }
+.mr-5 { margin-right: $spacing-xlarge; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: $spacing-small; }
+.p-2 { padding: $spacing-base; }
+.p-3 { padding: $spacing-medium; }
+.p-4 { padding: $spacing-large; }
+.p-5 { padding: $spacing-xlarge; }
+
+.pt-0 { padding-top: 0; }
+.pt-1 { padding-top: $spacing-small; }
+.pt-2 { padding-top: $spacing-base; }
+.pt-3 { padding-top: $spacing-medium; }
+.pt-4 { padding-top: $spacing-large; }
+.pt-5 { padding-top: $spacing-xlarge; }
+
+.pb-0 { padding-bottom: 0; }
+.pb-1 { padding-bottom: $spacing-small; }
+.pb-2 { padding-bottom: $spacing-base; }
+.pb-3 { padding-bottom: $spacing-medium; }
+.pb-4 { padding-bottom: $spacing-large; }
+.pb-5 { padding-bottom: $spacing-xlarge; }
+
+.pl-0 { padding-left: 0; }
+.pl-1 { padding-left: $spacing-small; }
+.pl-2 { padding-left: $spacing-base; }
+.pl-3 { padding-left: $spacing-medium; }
+.pl-4 { padding-left: $spacing-large; }
+.pl-5 { padding-left: $spacing-xlarge; }
+
+.pr-0 { padding-right: 0; }
+.pr-1 { padding-right: $spacing-small; }
+.pr-2 { padding-right: $spacing-base; }
+.pr-3 { padding-right: $spacing-medium; }
+.pr-4 { padding-right: $spacing-large; }
+.pr-5 { padding-right: $spacing-xlarge; }
+
+/* 通用文本类 */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-primary {
+  color: $primary-color;
+}
+
+.text-secondary {
+  color: $secondary-color;
+}
+
+.text-warning {
+  color: $warning-color;
+}
+
+.text-danger {
+  color: $danger-color;
+}
+
+.text-muted {
+  color: $text-color-secondary;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.font-small {
+  font-size: $font-size-small;
+}
+
+.font-base {
+  font-size: $font-size-base;
+}
+
+.font-medium {
+  font-size: $font-size-medium;
+}
+
+.font-large {
+  font-size: $font-size-large;
+}
+
+.font-xlarge {
+  font-size: $font-size-xlarge;
+}
+
+.font-xxlarge {
+  font-size: $font-size-xxlarge;
+}
+
+/* 通用边框和圆角 */
+.rounded-sm {
+  border-radius: $border-radius-small;
+}
+
+.rounded {
+  border-radius: $border-radius-base;
+}
+
+.rounded-lg {
+  border-radius: $border-radius-large;
+}
+
+.rounded-circle {
+  border-radius: $border-radius-circle;
+}
+
+.border {
+  border: 1rpx solid $border-color;
+}
+
+.border-top {
+  border-top: 1rpx solid $border-color;
+}
+
+.border-bottom {
+  border-bottom: 1rpx solid $border-color;
+}
+
+.border-left {
+  border-left: 1rpx solid $border-color;
+}
+
+.border-right {
+  border-right: 1rpx solid $border-color;
+}
+
+/* 通用阴影 */
+.shadow-sm {
+  box-shadow: $shadow-base;
+}
+
+.shadow {
+  box-shadow: $shadow-medium;
+}
+
+.shadow-lg {
+  box-shadow: $shadow-large;
+}
+
+/* 通用卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: $border-radius-base;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
+  box-shadow: $shadow-base;
+}
+
+/* 通用按钮样式 */
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-base $spacing-large;
+  border-radius: $border-radius-base;
+  font-size: $font-size-medium;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: $primary-color;
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: $secondary-color;
+  color: #fff;
+}
+
+.btn-warning {
+  background-color: $warning-color;
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: $danger-color;
+  color: #fff;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1rpx solid $border-color;
+}
+
+/* 通用列表样式 */
+.list {
+  background-color: #fff;
+  border-radius: $border-radius-base;
+  overflow: hidden;
+}
+
+.list-item {
+  padding: $spacing-medium;
+  border-bottom: 1rpx solid $border-color;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+/* 通用表单样式 */
+.form-item {
+  margin-bottom: $spacing-medium;
+}
+
+.form-label {
+  font-size: $font-size-medium;
+  margin-bottom: $spacing-small;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  border: 1rpx solid $border-color;
+  border-radius: $border-radius-base;
+  padding: 0 $spacing-medium;
+  font-size: $font-size-base;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 200rpx;
+  border: 1rpx solid $border-color;
+  border-radius: $border-radius-base;
+  padding: $spacing-base;
+  font-size: $font-size-base;
+}
+
+/* 辅助类 */
+.full-width {
+  width: 100%;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+/* 动画类 */
+.fade-in {
+  animation: fadeIn $animation-duration-base ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

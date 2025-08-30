@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Callable
 from dotenv import load_dotenv
 from api.routes import router as api_router
+from api.routes_base64 import router as base64_router
 from utils.image_processor import ImageProcessor
 
 # 自定义中间件类来记录请求和响应信息
@@ -207,6 +208,8 @@ async def startup_event():
 
 # Include API routes
 app.include_router(api_router, prefix="/api")
+# Include Base64 API routes
+app.include_router(base64_router, prefix="/api")
 
 # Root endpoint
 @app.get("/")

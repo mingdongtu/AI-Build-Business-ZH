@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <title>食品健康评分</title>
+    <style>
+      html,
+      body,
+      #app {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      html {
+        font-size: 16px;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Segoe UI, Arial, Roboto,
+          PingFang SC, miui, Hiragino Sans GB, Microsoft Yahei, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* 修复uni-app在H5环境下的一些样式问题 */
+      uni-page-body {
+        height: 100%;
+        width: 100%;
+      }
+      
+      uni-page-head {
+        display: block !important;
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded');
+      });
+      window.addEventListener('load', function() {
+        console.log('Page fully loaded');
+        // 检查是否有uni对象
+        if (window.uni) {
+          console.log('uni对象已加载');
+        } else {
+          console.error('uni对象未加载，可能导致白屏');
+        }
+        // 检查Vue是否正确挂载
+        setTimeout(function() {
+          const appEl = document.getElementById('app');
+          if (appEl && appEl.childNodes.length > 0) {
+            console.log('Vue应用已挂载');
+          } else {
+            console.error('Vue应用未挂载，可能导致白屏');
+          }
+        }, 1000);
+      });
+      window.addEventListener('error', function(e) {
+        console.error('全局错误:', e.message, '文件:', e.filename, '行号:', e.lineno);
+      });
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <strong>请启用JavaScript以使用本应用</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- 确保正确加载入口文件 -->
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

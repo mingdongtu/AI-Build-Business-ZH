@@ -1,0 +1,41 @@
+/* 颜色变量 */
+$primary-color: #4CAF50;
+$secondary-color: #2196F3;
+$warning-color: #FFC107;
+$danger-color: #F44336;
+$text-color: #333333;
+$text-color-secondary: #666666;
+$background-color: #f8f8f8;
+$border-color: #eeeeee;
+
+/* 尺寸变量 */
+$font-size-small: 24rpx;
+$font-size-base: 28rpx;
+$font-size-medium: 32rpx;
+$font-size-large: 36rpx;
+$font-size-xlarge: 40rpx;
+$font-size-xxlarge: 48rpx;
+
+/* 间距变量 */
+$spacing-mini: 5rpx;
+$spacing-small: 10rpx;
+$spacing-base: 20rpx;
+$spacing-medium: 30rpx;
+$spacing-large: 40rpx;
+$spacing-xlarge: 50rpx;
+
+/* 边框圆角 */
+$border-radius-small: 5rpx;
+$border-radius-base: 10rpx;
+$border-radius-large: 20rpx;
+$border-radius-circle: 50%;
+
+/* 阴影 */
+$shadow-base: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+$shadow-medium: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+$shadow-large: 0 10rpx 30rpx rgba(0, 0, 0, 0.15);
+
+/* 动画时间 */
+$animation-duration-fast: 0.2s;
+$animation-duration-base: 0.3s;
+$animation-duration-slow: 0.5s;

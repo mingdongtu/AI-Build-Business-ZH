@@ -1,0 +1,41 @@
+/* 全局样式 */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+}
+
+/* 适配H5环境 */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 修复uni-app在H5环境下的一些样式问题 */
+uni-page-body, uni-page-wrapper, uni-page, uni-page-head {
+  display: block;
+}
+
+uni-page-body {
+  min-height: 100%;
+}
+
+/* 修复小程序rpx单位在H5下的显示 */
+@media screen and (min-width: 768px) {
+  uni-view[class*="uni-"], uni-scroll-view[class*="uni-"], uni-swiper[class*="uni-"] {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+}
+
+/* 修复H5环境下的滚动问题 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
